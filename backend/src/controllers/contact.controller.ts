@@ -17,7 +17,7 @@ export class ContactController {
     }
 
     get(req: Request, res: Response, next: NextFunction) {
-        this.repo.getAllContacts().then(res.json).catch(next);
+        this.repo.getAllContacts().then((data)=> res.json(data)).catch(next);
     }
 
     getById(req: Request, res: Response, next: NextFunction) {
@@ -31,6 +31,6 @@ export class ContactController {
     }
 
     delete(req: Request, res: Response, next: NextFunction) {
-        this.repo.deleteContactItem(req.params.id).then(()=> res.status(200)).catch(next);
+        this.repo.deleteContactItem(req.params.id).then(()=> res.status(200).end()).catch(next);
     }
 }

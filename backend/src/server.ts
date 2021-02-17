@@ -10,7 +10,7 @@ AWS.config.credentials = new AWS.SharedIniFileCredentials({ profile: "default" }
 process.env.AWS_REGION = "us-east-1";
 process.env.LOG_LEVEL = "debug";
 process.env.STAGE = "local";
-process.env.DATA_TABLE_NAME = "fl-js-serverless-demo";
+process.env.DATA_TABLE_NAME = "fl-js-demo-DataTable-QY8LCNS936YZ";
 
 const ddb = new DocumentClient({
     // endpoint: "http://localhost:8000",    //Uncomment to use local DDB

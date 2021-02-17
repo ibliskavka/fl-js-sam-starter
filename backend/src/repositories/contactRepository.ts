@@ -55,7 +55,7 @@ export class ContactRepository extends BaseRepository {
         return await this.putItem(this.tableName, model);
     }
 
-    async deleteContactItem(email: string) {
-        return await this.deleteItem(this.tableName, {pk:this.pk, sk: email});
+    async deleteContactItem(email: string): Promise<void> {
+        await this.deleteItem(this.tableName, {pk:this.pk, sk: email});
     }
 }

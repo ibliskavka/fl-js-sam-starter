@@ -1,6 +1,18 @@
 {
     "version": "0.2.0",
     "configurations": [
+          {
+            "name": "Debug Express",
+            "type": "node",
+            "request": "launch",
+            "runtimeArgs": [
+                "--inspect-brk",
+                "${workspaceRoot}/node_modules/nodemon/bin/nodemon.js",
+                "src/server.ts",
+            ],
+            "console": "integratedTerminal",
+            "internalConsoleOptions": "neverOpen"
+        },
         {
             "name": "Run Current Jest File",
             "type": "node",

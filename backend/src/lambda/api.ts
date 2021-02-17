@@ -24,7 +24,6 @@ export class Api {
             expressWinston.logger({
                 transports: [new winston.transports.Console()],
                 format: winston.format.combine(
-                    winston.format.colorize(),
                     winston.format.json(),
                 ),
                 meta: true, // optional: control whether you want to log the meta data about the request (default to true)
