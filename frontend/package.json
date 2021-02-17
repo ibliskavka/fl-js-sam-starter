@@ -1,0 +1,59 @@
+{
+  "name": "app-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "copy-interfaces": "cp ../backend/src/api-interfaces.ts src/",
+    "start": "npm run copy-interfaces && cp ./env/dev/* ./public/ && npm run update-build-time && react-scripts start",
+    "update-build-time": "node updateBuildTime.js",
+    "build": "npm run copy-interfaces && npm run update-build-time && react-scripts build",
+    "build:dev": "cp ./env/dev/* ./public/ && npm run build",
+    "deploy:dev": "npm run build:dev && aws s3 sync build s3://TBD --delete --profile vf-team6 --region us-east-1 && aws cloudfront create-invalidation --distribution-id TBD --paths / --profile vf-team6 --region us-east-1",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "format": "prettier --write src/**/*.ts src/**/*.tsx src/**/*.css",
+    "lint": "eslint src/**/* --fix"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version",
+      "ie 11"
+    ]
+  },
+  "dependencies": {
+    "@testing-library/jest-dom": "^4.2.4",
+    "@testing-library/react": "^9.3.2",
+    "@testing-library/user-event": "^7.1.2",
+    "@types/jest": "^24.0.0",
+    "@types/node": "^12.19.15",
+    "@types/prop-types": "^15.7.3",
+    "@types/react": "^16.9.0",
+    "@types/react-dom": "^16.9.0",
+    "@types/react-router-dom": "^5.1.7",
+    "aws-amplify": "^3.3.14",
+    "formik": "^2.2.6",
+    "prop-types": "^15.7.2",
+    "react": "^17.0.1",
+    "react-app-polyfill": "^1.0.6",
+    "react-dom": "^17.0.1",
+    "react-router-dom": "^5.2.0",
+    "react-scripts": "3.4.0",
+    "semantic-ui-css": "^2.4.1",
+    "semantic-ui-react": "^2.0.3",
+    "typescript": "^3.9.7",
+    "yup": "^0.32.8"
+  },
+  "devDependencies": {
+    "prettier": "^2.2.1"
+  }
+}

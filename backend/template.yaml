@@ -1,0 +1,384 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+
+Description: Demonstrate creating an installable serverless application in AWS
+
+Parameters:
+
+  Environment:
+    Type: String
+    Description: nonprod/prod, etc. "prod" sets higher caching ttl and does not allow CORS.
+
+  AcmCertArn:
+    Type: String
+    Default: ""
+    Description: Optional. When provided, CloudFront will be configured to use this ACM Certificate
+
+  AppAlias:
+    Type: String
+    Default: ""
+    Description: Optional. CloudFront alias, such as app.com or my.app.com.
+
+  AdminUserEmail:
+    Description: When set, will automatically create an admin user for the application and send an invite email. Check your Junk mail.
+    Type: String
+
+Globals:
+  Function:
+    Runtime: nodejs12.x
+    MemorySize: 512
+    Timeout: 15
+    CodeUri: "."
+    Environment:
+      Variables:
+        STAGE: !Ref Environment
+        # Winston JS log Level
+        LOG_LEVEL: !If
+          - IsProd
+          - "error"
+          - "debug"
+        STACK_NAME: !Ref AWS::StackName
+        VERIFY_FROM_CF_STRING: !Ref AcmCertArn # CloudFront will add this to the "Verify-From-Cf" header. This is used to block direct API GW Access.
+
+Conditions:
+  IsProd: !Equals [!Ref Environment, "prod"]
+  AcmCertProvided: !Not [!Equals [!Ref AcmCertArn, ""]]
+  AppAliasProvided: !Not [!Equals [!Ref AppAlias, ""]]
+
+Resources:
+
+  # START DATA TABLES
+
+  DataTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: "pk"
+          AttributeType: "S"
+        - AttributeName: "sk"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "pk"
+          KeyType: "HASH"
+        - AttributeName: "sk"
+          KeyType: "RANGE"
+      BillingMode: PAY_PER_REQUEST
+
+  # END DATA TABLES
+
+  # START COGNITO
+
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Ref AWS::StackName
+      MfaConfiguration: OFF
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: true
+        InviteMessageTemplate:
+          EmailSubject: "Your App Temporary Password"
+          EmailMessage: !Join
+            - " "
+            - - "Your username is {username} and temporary password is {####}."
+              - !If
+                - AppAliasProvided
+                - !Join
+                  - ""
+                  - - "The App address is: "
+                    - "https://"
+                    - !Ref AppAlias
+                - !Ref AWS::NoValue # Cant send link to CloudFront URL due to circular ref.
+
+  CognitoUserGroup:
+    Type: AWS::Cognito::UserPoolGroup
+    Properties:
+      Description: !Sub "Allows user to manage profiles"
+      GroupName: admin
+      UserPoolId: !Ref UserPool
+
+  CognitoAdminUser:
+    Type: AWS::Cognito::UserPoolUser
+    Properties: 
+      DesiredDeliveryMediums: 
+        - EMAIL
+      UserAttributes: 
+        - Name: email
+          Value: !Ref AdminUserEmail
+        - Name: email_verified
+          Value: true
+      Username: !Ref AdminUserEmail
+      UserPoolId: !Ref UserPool
+
+  CognitoAdminUserMembership:
+    Type: AWS::Cognito::UserPoolUserToGroupAttachment
+    Properties: 
+      GroupName: !Ref CognitoUserGroup
+      Username: !Ref CognitoAdminUser
+      UserPoolId: !Ref UserPool
+
+  UserPoolDomain:
+    Type: AWS::Cognito::UserPoolDomain
+    Properties:
+      Domain: !Ref AWS::StackName
+      UserPoolId: !Ref UserPool
+
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      UserPoolId: !Ref UserPool
+      SupportedIdentityProviders:
+        - COGNITO
+      AllowedOAuthFlows:
+        - code
+      AllowedOAuthScopes:
+        - email
+        - openid
+        # - profile
+      AllowedOAuthFlowsUserPoolClient: true
+      GenerateSecret: false
+      CallbackURLs: !If
+        - IsProd
+        - !Sub "https://${AppDistribution.DomainName}"
+        - - !Sub "https://${AppDistribution.DomainName}"
+          - "http://localhost:3000"
+      LogoutURLs: !If
+        - IsProd
+        - !Sub "https://${AppDistribution.DomainName}/logout"
+        - - "http://localhost:3000/logout"
+          - !Sub "https://${AppDistribution.DomainName}/logout"
+
+  # END COGNITO
+
+  RestApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: !Ref Environment
+      Cors:
+        AllowMethods: "'OPTIONS,GET,POST'"
+        AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key'"
+        AllowOrigin: !If
+          - IsProd
+          - "''"
+          - "'*'"
+      Auth:
+        DefaultAuthorizer: CognitoAuth
+        AddDefaultAuthorizerToCorsPreflight: false
+        Authorizers:
+          CognitoAuth:
+            UserPoolArn: !GetAtt UserPool.Arn
+            Identity:
+              Header: Authorization
+
+  # END REST API
+
+  # START LAMBDA
+
+  ApiFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/lambda/index.api
+      Description: Implements server-side features
+      Events:
+        GetProfiles:
+          Type: Api
+          Properties:
+            RestApiId: !Ref RestApi
+            Path: /api/profiles
+            Method: get
+        PostProfiles:
+          Type: Api
+          Properties:
+            RestApiId: !Ref RestApi
+            Path: /api/profiles
+            Method: post
+
+  ConnectFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/lambda/index.profiles
+      Description: Implements server-side features
+      Events:
+        GetInstances:
+          Type: Api
+          Properties:
+            RestApiId: !Ref RestApi
+            Path: /api/listInstances
+            Method: post
+        GetFlows:
+          Type: Api
+          Properties:
+            RestApiId: !Ref RestApi
+            Path: /api/listFlows
+            Method: post
+
+  CustomResourceFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: src/customResource/index.handler
+      Description: "Unzips the front end app assets into S3 and invalidates cache"
+      MemorySize: 1024
+      Timeout: 300
+      Policies:
+        - S3CrudPolicy:
+            BucketName: !Ref AppBucket
+        - Statement:
+            - Effect: Allow
+              Action:
+                - cloudfront:CreateInvalidation
+              Resource:
+                - !Sub arn:aws:cloudfront::${AWS::AccountId}:distribution/${AppDistribution}
+
+  # END LAMBDA
+
+  DeployFrontEnd:
+    Type: Custom::DeployFrontEnd
+    Properties:
+      ServiceToken: !GetAtt CustomResourceFunction.Arn
+      Source: app.zip
+      Destination: !Sub "s3://${AppBucket}"
+      DistributionId: !Ref AppDistribution
+      Config:
+        # Version must be updated to redeploy using CloudFormation
+        version: 1.0.0
+        environment: !Ref Environment
+        region: !Ref AWS::Region
+        apiUrl: ""
+        cognito:
+          clientId: !Ref UserPoolClient
+          domain: !Sub ${UserPoolDomain}.auth.${AWS::Region}.amazoncognito.com
+          # identityPoolId: !Ref IdentityPool
+          userPoolId: !Ref UserPool
+
+# START HOSTING
+
+  AppBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: Private
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      WebsiteConfiguration:
+        IndexDocument: index.html
+
+  AppBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      PolicyDocument:
+        Id: WebAppBucketPolicy
+        Version: 2012-10-17
+        Statement:
+          - Sid: "Grant a CloudFront Origin Identity access to support private content"
+            Effect: Allow
+            Principal:
+              CanonicalUser: !GetAtt OriginAccessIdentity.S3CanonicalUserId
+            Action: s3:GetObject
+            Resource: !Sub "${AppBucket.Arn}/*"
+      Bucket: !Ref AppBucket
+
+  # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-cloudfront-cloudfrontoriginaccessidentity.html
+  OriginAccessIdentity:
+    Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+    Properties:
+      CloudFrontOriginAccessIdentityConfig:
+        Comment: !Ref AWS::StackName
+
+  # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-cloudfront-distribution.html
+  AppDistribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Origins:
+          - Id: myS3Origin
+            DomainName: !GetAtt AppBucket.RegionalDomainName
+            S3OriginConfig:
+              OriginAccessIdentity: !Sub origin-access-identity/cloudfront/${OriginAccessIdentity}
+          - Id: myApiOrigin
+            DomainName: !Sub ${RestApi}.execute-api.${AWS::Region}.amazonaws.com
+            OriginPath: !Sub "/${Environment}"
+            CustomOriginConfig:
+              # HTTPPort: 80
+              HTTPSPort: 443
+              OriginProtocolPolicy: https-only
+            OriginCustomHeaders:
+              - HeaderName: "Verify-From-Cf"
+                HeaderValue: !Ref AcmCertArn
+        Enabled: "true"
+        Comment: !Ref AWS::StackName
+        CustomErrorResponses:
+          - ErrorCode: 403
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+          - ErrorCachingMinTTL: 5
+            ErrorCode: 404
+            ResponseCode: 200
+            ResponsePagePath: /index.html
+        DefaultRootObject: index.html
+        Aliases: !If
+          - AppAliasProvided
+          - - !Ref AppAlias
+          - !Ref AWS::NoValue
+        DefaultCacheBehavior:
+          AllowedMethods:
+            - GET
+            - HEAD
+            - OPTIONS
+          Compress: "true"
+          TargetOriginId: myS3Origin
+          ForwardedValues:
+            QueryString: "false"
+            Cookies:
+              Forward: none
+          ViewerProtocolPolicy: redirect-to-https
+          DefaultTTL: !If
+            - IsProd
+            - 3600
+            - 60
+          MaxTTL: !If
+            - IsProd
+            - 86400
+            - 300
+          MinTTL: !If
+            - IsProd
+            - 1800
+            - 20
+        CacheBehaviors:
+          - TargetOriginId: myApiOrigin
+            PathPattern: "/api/*"
+            AllowedMethods: [HEAD, DELETE, POST, GET, OPTIONS, PUT, PATCH]
+            CachedMethods: [HEAD, GET, OPTIONS]
+            ForwardedValues:
+              Headers:
+                - Access-Control-Request-Headers
+                - Access-Control-Request-Method
+                - Origin
+                - Authorization
+                # - Host APIG needs to use SNI
+              QueryString: false
+            ViewerProtocolPolicy: https-only
+            Compress: true
+            DefaultTTL: 0
+        PriceClass: PriceClass_100
+        ViewerCertificate: !If
+          - AcmCertProvided
+          - AcmCertificateArn: !Ref AcmCertArn
+            SslSupportMethod: sni-only
+          - !Ref AWS::NoValue
+      Tags:
+        - Key: Name
+          Value: !Sub "${AWS::StackName}"
+
+# END HOSTING
+
+Outputs:
+  AppUrl:
+    Value: !Sub "https://${AppDistribution.DomainName}"
+    Description: URL for website CDN
+  CognitoUserPoolId:
+    Value: !Ref UserPool
+  CognitoDomain:
+    Value: !Sub ${UserPoolDomain}.auth.${AWS::Region}.amazoncognito.com
+  CognitoClientId:
+    Value: !Ref UserPoolClient

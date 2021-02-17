@@ -1,0 +1,12 @@
+{
+  "environment": "dev",
+  "region": "us-east-1",
+  "apiUrl": "https://d30rgytop5p7vu.cloudfront.net",
+  "cognito": {
+    "clientId": "ueem7cab44ivb900he27hpch9",
+    "domain": "vf-ccsync2-dev2.auth.us-east-1.amazoncognito.com",
+    "userPoolId": "us-east-1_M20HncEh2"
+  },
+  "buildTime": 1611674325541,
+  "version": "1.0.1"
+}
