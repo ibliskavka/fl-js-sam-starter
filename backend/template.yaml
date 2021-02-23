@@ -179,18 +179,30 @@ Resources:
       Handler: src/lambda/index.api
       Description: Implements server-side features
       Events:
-        GetProfiles:
+        GetContacts:
           Type: Api
           Properties:
             RestApiId: !Ref RestApi
-            Path: /api/profiles
+            Path: /api/contact
             Method: get
-        PostProfiles:
+        GetContactById:
           Type: Api
           Properties:
             RestApiId: !Ref RestApi
-            Path: /api/profiles
+            Path: /api/contact/{id}
+            Method: get
+        PostContact:
+          Type: Api
+          Properties:
+            RestApiId: !Ref RestApi
+            Path: /api/contact
             Method: post
+        DeleteContact:
+          Type: Api
+          Properties:
+            RestApiId: !Ref RestApi
+            Path: /api/contact
+            Method: delete
 
   CustomResourceFunction:
     Type: AWS::Serverless::Function
@@ -223,7 +235,7 @@ Resources:
         version: 1.0.0
         environment: !Ref Environment
         region: !Ref AWS::Region
-        apiUrl: ""
+        apiUrl: !Sub https://${AppDistribution.DomainName}/api
         cognito:
           clientId: !Ref UserPoolClient
           domain: !Sub ${UserPoolDomain}.auth.${AWS::Region}.amazoncognito.com
