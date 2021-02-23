@@ -24,7 +24,7 @@ export const Home = () => {
                         <ContactList contacts={contacts.result} />
                         <Message error hidden={contacts.error === null}>
                           {contacts.error}
-                        </Message>                        
+                        </Message>
                     </Segment>
                 </Grid.Column>
             </Grid>

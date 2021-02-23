@@ -27,7 +27,7 @@ Parameters:
   AppAlias:
     Type: String
     Default: ""
-    Description: Optional. CloudFront alias, such as app.com or my.app.com.
+    Description: Optional. CloudFront alias, such as app.com or my.app.com. If used, you must create a CNAME DNS entry from your alias to the CloudFront URL
 
   AdminUserEmail:
     Description: When set, will automatically create an admin user for the application and send an invite email. Check your Junk mail.
@@ -49,7 +49,8 @@ Globals:
           - "debug"
         STACK_NAME: !Ref AWS::StackName
         DATA_TABLE_NAME: !Ref DataTable
-        VERIFY_FROM_CF_STRING: !Ref AcmCertArn # CloudFront will add this to the "Verify-From-Cf" header. This is used to block direct API GW Access.
+        DATA_BUCKET_NAME: !Ref DataBucket
+        VERIFY_FROM_CF_STRING: !Ref AcmCertArn # CloudFront will add this to the "Verify-From-Cf" header. You can use this to block direct API GW Access.
 
 Conditions:
   IsProd: !Equals [!Ref Environment, "prod"]
@@ -74,6 +75,22 @@ Resources:
         - AttributeName: "sk"
           KeyType: "RANGE"
       BillingMode: PAY_PER_REQUEST
+      Tags:
+        - Key: Description
+          Value: Stores user data
+
+  DataBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: Private
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      Tags:
+        - Key: Description
+          Value: Stores user files
 
   # END DATA TABLES
 
@@ -98,7 +115,7 @@ Resources:
                   - - "The App address is: "
                     - "https://"
                     - !Ref AppAlias
-                - !Ref AWS::NoValue # Cant send link to CloudFront URL due to circular ref.
+                - !Ref AWS::NoValue # Cant reference AppDistribution.DomainName due to circular dependency
 
   CognitoUserGroup:
     Type: AWS::Cognito::UserPoolGroup
@@ -160,6 +177,8 @@ Resources:
 
   # END COGNITO
 
+  # START REST API
+
   RestApi:
     Type: AWS::Serverless::Api
     Properties:
@@ -188,10 +207,12 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: src/lambda/index.api
-      Description: Implements server-side features
+      Description: Hosts the Express app. (Lambda doesnt require Express, this is just for fun)
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref DataTable
+        - S3CrudPolicy:
+            BucketName: !Ref DataBucket
       Events:
         GetContacts:
           Type: Api
@@ -222,7 +243,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: src/customResource/index.handler
-      Description: "Unzips the front end app assets into S3 and invalidates cache"
+      Description: "Unzips the front end app assets into S3, writes config.json, and invalidates cache"
       MemorySize: 1024
       Timeout: 300
       Policies:
@@ -246,14 +267,13 @@ Resources:
       DistributionId: !Ref AppDistribution
       Config:
         # Version must be updated to redeploy using CloudFormation
-        version: 1.0.1
+        version: 1.0.2
         environment: !Ref Environment
         region: !Ref AWS::Region
         apiUrl: !Sub https://${AppDistribution.DomainName}
         cognito:
           clientId: !Ref UserPoolClient
           domain: !Sub ${UserPoolDomain}.auth.${AWS::Region}.amazoncognito.com
-          # identityPoolId: !Ref IdentityPool
           userPoolId: !Ref UserPool
 
 # START HOSTING
@@ -362,7 +382,6 @@ Resources:
                 - Access-Control-Request-Method
                 - Origin
                 - Authorization
-                # - Host APIG needs to use SNI
               QueryString: false
             ViewerProtocolPolicy: https-only
             Compress: true
@@ -381,11 +400,12 @@ Resources:
 
 Outputs:
   AppUrl:
-    Value: !Sub "https://${AppDistribution.DomainName}"
+    Value: !If
+      - AppAliasProvided
+      - !Sub "https://${AppAlias}"
+      - !Sub "https://${AppDistribution.DomainName}"
     Description: URL for website CDN
-  CognitoUserPoolId:
-    Value: !Ref UserPool
-  CognitoDomain:
-    Value: !Sub ${UserPoolDomain}.auth.${AWS::Region}.amazoncognito.com
-  CognitoClientId:
-    Value: !Ref UserPoolClient
+  DataBucket:
+    Value: !Ref DataBucket
+  DataTable:
+    Value: !Ref DataTable

@@ -1,5 +1,8 @@
 import { ApplicationError } from "../model/applicationError";
 
+/**
+ * Provides type-safe configuration access with
+ */
 export class EnvConfig {
 
     static get region(): string {
@@ -11,6 +14,10 @@ export class EnvConfig {
 
     static get tableName(): string {
         return this.getEnvVal("DATA_TABLE_NAME");
+    }
+
+    static get bucketName(): string {
+        return this.getEnvVal("DATA_BUCKET_NAME");
     }
 
     static get verifyFromCloudFrontHeader(): string {

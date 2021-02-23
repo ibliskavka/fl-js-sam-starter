@@ -2,7 +2,7 @@
 set -e                        # Fail script on error
 
 PROFILE="default"                       # AWS Profile to use for deploy
-REGION="us-east-2"                      # Deployment Region
+REGION="us-east-1"                      # Deployment Region
 
 CLIENT="fl-js"
 BUCKET="${CLIENT}-builds-${REGION}"     # Artifact Bucket - must be created beforehand
@@ -13,6 +13,8 @@ TIMESTAMP=$(date "+%Y%m%d-%H%M%S")
 PREFIX="$PROJECT/$TIMESTAMP"
 
 ./build.sh
+
+cd backend
 sam validate -t .aws-sam/build/template.yaml --region $REGION --profile $PROFILE
 
 ## Build and Package

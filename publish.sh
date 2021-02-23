@@ -8,8 +8,9 @@ PUBLIC_BUCKET="my-sar-builds-$REGION-public"      # Public Bucket - Hosts readme
 
 echo "Building"
 ./build.sh
-sam validate -t .aws-sam/build/template.yaml --region $REGION --profile $PROFILE
 
+cd backend
+sam validate -t .aws-sam/build/template.yaml --region $REGION --profile $PROFILE
 
 SAM_BUCKET="my-sar-builds-$REGION"                # Artifact Bucket - must be created beforehand. Per region.
 echo "Deploying to $REGION"
