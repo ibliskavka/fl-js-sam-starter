@@ -5,7 +5,7 @@ import { json } from "body-parser";
 import { eventContext } from "aws-serverless-express/middleware";
 import { ContactController } from "../controllers/contact.controller";
 import { EnvConfig } from "../services/envConfig";
-import { ContactService } from "../services/contact.service";
+import { ContactService } from "../controllers/contact.service";
 import cors from "cors";
 
 export class Api {

@@ -1,5 +1,5 @@
 import { Application, Request, Response, NextFunction } from "express";
-import { ContactService } from "../services/contact.service";
+import { ContactService } from "./contact.service";
 
 /**
  * This controller is responsible for decoding the requests and sending the correct responses

@@ -4,7 +4,7 @@ import { ContactRepository } from "../repositories/contactRepository";
 import { Api } from "./api";
 import { createServer, proxy } from "aws-serverless-express";
 import { EnvConfig } from "../services/envConfig";
-import { ContactService } from "../services/contact.service";
+import { ContactService } from "../controllers/contact.service";
 
 /**
  * Lambda expects functions, not objects.

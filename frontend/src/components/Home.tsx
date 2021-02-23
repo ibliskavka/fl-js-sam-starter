@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Grid, Segment } from "semantic-ui-react";
+import { Grid, Message, Segment } from "semantic-ui-react";
 import { useContacts } from "../hooks/useContacts";
 import { ContactForm } from "./Contact/ContactForm";
 import { ContactList } from "./Contact/ContactList";
@@ -22,6 +22,9 @@ export const Home = () => {
                     <Segment>
                         <h4>Contacts</h4>
                         <ContactList contacts={contacts.result} />
+                        <Message error hidden={contacts.error === null}>
+                          {contacts.error}
+                        </Message>                        
                     </Segment>
                 </Grid.Column>
             </Grid>

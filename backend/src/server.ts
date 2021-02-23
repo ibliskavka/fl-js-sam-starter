@@ -2,7 +2,7 @@ import AWS from "aws-sdk";
 import { DocumentClient } from "aws-sdk/clients/dynamodb";
 import { Api } from "./lambda/api";
 import { ContactRepository } from "./repositories/contactRepository";
-import { ContactService } from "./services/contact.service";
+import { ContactService } from "./controllers/contact.service";
 import { EnvConfig } from "./services/envConfig";
 
 // This is the local Express server.
