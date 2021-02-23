@@ -52,3 +52,9 @@ Also see:
 
 - [Backend Readme](backend/README.md)
 - [Frontend Readme](frontend/README.md)
+
+## P.S. - VoiceFoundry is Hiring AWS Engineers
+
+DM me your Resume
+
+https://linkedin.com/in/ibliskavka
