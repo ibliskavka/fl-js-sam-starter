@@ -3,6 +3,16 @@ Transform: AWS::Serverless-2016-10-31
 
 Description: Demonstrate creating an installable serverless application in AWS
 
+# ONLY NEED THIS FOR SAR DEPLOY
+# Metadata:
+#   AWS::ServerlessRepo::Application:
+#     Name: fl-js-sam-starter
+#     Description: Demonstrate creating an installable serverless application in AWS
+#     Author: Ivan Bliskavka
+#     ReadmeUrl: README.md
+#     HomePageUrl: https://bliskavka.com
+#     SemanticVersion: 1.0.0
+
 Parameters:
 
   Environment:
@@ -38,6 +48,7 @@ Globals:
           - "error"
           - "debug"
         STACK_NAME: !Ref AWS::StackName
+        DATA_TABLE_NAME: !Ref DataTable
         VERIFY_FROM_CF_STRING: !Ref AcmCertArn # CloudFront will add this to the "Verify-From-Cf" header. This is used to block direct API GW Access.
 
 Conditions:
@@ -178,6 +189,9 @@ Resources:
     Properties:
       Handler: src/lambda/index.api
       Description: Implements server-side features
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref DataTable
       Events:
         GetContacts:
           Type: Api
@@ -232,7 +246,7 @@ Resources:
       DistributionId: !Ref AppDistribution
       Config:
         # Version must be updated to redeploy using CloudFormation
-        version: 1.0.0
+        version: 1.0.1
         environment: !Ref Environment
         region: !Ref AWS::Region
         apiUrl: !Sub https://${AppDistribution.DomainName}/api

@@ -15,10 +15,10 @@ export class ContactController {
     }
 
     public addRoutes(app: Application): void {
-        app.get("/contact", this.get);
-        app.get("/contact/:id", this.getById);
-        app.post("/contact", this.post);
-        app.delete("/contact/:id", this.delete);
+        app.get("/api/contact", this.get);
+        app.get("/api/contact/:id", this.getById);
+        app.post("/api/contact", this.post);
+        app.delete("/api/contact/:id", this.delete);
     }
 
     get(req: Request, res: Response, next: NextFunction) {

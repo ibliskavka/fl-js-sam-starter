@@ -11,21 +11,21 @@ export class ApiClient implements IContactApi {
   }
 
   async listContacts():  Promise<IContact[]>{
-    const response = await this.get(`/contact`);
+    const response = await this.get(`/api/contact`);
     return await response.json();
   }
 
   async getContactById(email: string): Promise<IContact> {
-    const response = await this.get(`/contact/${email}`);
+    const response = await this.get(`/api/contact/${email}`);
     return await response.json();
   }
 
   async saveContact(contact: IContact): Promise<void> {
-    await this.post(`/contact`, contact);
+    await this.post(`/api/contact`, contact);
   }
 
   async deleteContact(email: string): Promise<void> {
-    await this.delete(`/contact/${email}`);
+    await this.delete(`/api/contact/${email}`);
   }
 
   private async get(endpoint: string): Promise<Response> {
