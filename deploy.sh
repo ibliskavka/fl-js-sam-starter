@@ -1,13 +1,7 @@
 #!/bin/bash -v
 set -e                        # Fail script on error
 
-PROFILE="default"
-REGION="us-east-1"                          # Deployment Region
-BUCKET="lsw-serverless-$REGION"             # Build Artifact Bucket - must be created beforehand
-
-ENVIRONMENT="demo"
-
-STACK_NAME="fl-js-${ENVIRONMENT}"
+# This script expects environment variables. See ./deploy-dev.sh
 
 echo "Building"
 ./build.sh
@@ -25,7 +19,7 @@ sam deploy \
       ParameterKey=Environment,ParameterValue="${ENVIRONMENT}" \
       ParameterKey=AcmCertArn,ParameterValue="" \
       ParameterKey=AppAlias,ParameterValue="" \
-      ParameterKey=AdminUserEmail,ParameterValue="ibliskavka@live.com" \
+      ParameterKey=AdminUserEmail,ParameterValue="${ADMIN_USER_EMAIL}" \
     --capabilities CAPABILITY_IAM CAPABILITY_AUTO_EXPAND \
     --region $REGION \
     --profile $PROFILE

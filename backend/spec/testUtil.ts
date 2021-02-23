@@ -1,43 +1,20 @@
-import axios from "axios";
-import _ from "lodash";
+import fetch, { Response } from "node-fetch";
 
-export interface ITiming {
-    elapsed: number;
-    count: number;
-}
-
+/**
+ * Simple helper class, consider using process.env for api URL to help with testing in pipeline
+ */
 export class TestUtil {
     // Defaults
-    static readonly baseUrl = "https://d1khlslk4394e7.cloudfront.net";
-    static readonly jurisdiction = "CT";
-    static readonly timeout = 15 * 60 * 1000;
+    static readonly baseUrl = "http://localhost:5000";
+    static readonly headers = { "Content-Type": "application/json" };
 
-    static setupEnv() {
-        // process.env.LOG_LEVEL = "debug";
-
-
-        axios.defaults.validateStatus = function () {
-            return true;
-        };
+    static get(endpoint: string): Promise<Response> {
+        return fetch(`${this.baseUrl}${endpoint}`, { method: "get", headers: this.headers });
     }
-
-    /**
-     * For timing operations
-     */
-    static seconds() {
-        return (new Date()).getTime() / 1000;
+    static post(endpoint: string, body: any): Promise<Response> {
+        return fetch(`${this.baseUrl}${endpoint}`, { method: "post", body: JSON.stringify(body), headers: this.headers });
     }
-
-    static elapsed(start: number): number {
-        return (Math.round(TestUtil.seconds() - start));
-    }
-
-    static computeMetrics(timings: ITiming[]): { [name: string]: number } {
-        return {
-            meanTime: _.mean(timings.map(x => x.elapsed)),
-            maxTime: _.max(timings.map(x => x.elapsed)),
-            meanCount: _.mean(timings.map(x => x.count)),
-            maxCount: _.max(timings.map(x => x.count)),
-        };
+    static delete(endpoint: string): Promise<Response> {
+        return fetch(`${this.baseUrl}${endpoint}`, { method: "delete", headers: this.headers });
     }
 }

@@ -2,6 +2,7 @@ import AWS from "aws-sdk";
 import { DocumentClient } from "aws-sdk/clients/dynamodb";
 import { Api } from "./lambda/api";
 import { ContactRepository } from "./repositories/contactRepository";
+import { ContactService } from "./services/contact.service";
 import { EnvConfig } from "./services/envConfig";
 
 // This is the local Express server.
@@ -17,7 +18,8 @@ const ddb = new DocumentClient({
 });
 
 const contactRepo = new ContactRepository(EnvConfig.tableName, ddb);
-const api = new Api(contactRepo);
+const contactService = new ContactService(contactRepo);
+const api = new Api(contactService);
 
 const port = 5000;
 api.app.listen(port, () => console.log(`server is running on http://localhost:${port}`));

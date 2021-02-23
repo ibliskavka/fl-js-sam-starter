@@ -1,8 +1,13 @@
 import { Application, Request, Response, NextFunction } from "express";
-import { ContactRepository } from "../repositories/contactRepository";
+import { ContactService } from "../services/contact.service";
 
+/**
+ * This controller is responsible for decoding the requests and sending the correct responses
+ * Additionally, the controller should check the user claims in the Authorization Header to confirm user is authorized.
+ * Any business logic should live in ContactService
+ */
 export class ContactController {
-    constructor(private repo: ContactRepository) {
+    constructor(private service: ContactService) {
         this.get = this.get.bind(this);
         this.getById = this.getById.bind(this);
         this.post = this.post.bind(this);
@@ -17,20 +22,20 @@ export class ContactController {
     }
 
     get(req: Request, res: Response, next: NextFunction) {
-        this.repo.getAllContacts().then((data)=> res.json(data)).catch(next);
+        this.service.listContacts().then((data)=> res.json(data)).catch(next);
     }
 
     getById(req: Request, res: Response, next: NextFunction) {
-        this.repo.getContact(req.params.id).then(contact=>{
+        this.service.getContactById(req.params.id).then(contact=>{
             return contact ? res.json(contact) : res.status(404).end();
         }).catch(next);
     }
 
     post(req: Request, res: Response, next: NextFunction) {
-        this.repo.putContactItem(req.body).then(()=> res.status(201).end()).catch(next);
+        this.service.saveContact(req.body).then(()=> res.status(201).end()).catch(next);
     }
 
     delete(req: Request, res: Response, next: NextFunction) {
-        this.repo.deleteContactItem(req.params.id).then(()=> res.status(200).end()).catch(next);
+        this.service.deleteContact(req.params.id).then(()=> res.status(200).end()).catch(next);
     }
 }

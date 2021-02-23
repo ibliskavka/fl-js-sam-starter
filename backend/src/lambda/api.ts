@@ -4,14 +4,14 @@ import expressWinston from "express-winston";
 import { json } from "body-parser";
 import { eventContext } from "aws-serverless-express/middleware";
 import { ContactController } from "../controllers/contact.controller";
-import { ContactRepository } from "../repositories/contactRepository";
 import { EnvConfig } from "../services/envConfig";
+import { ContactService } from "../services/contact.service";
 
 export class Api {
     public app: Application;
 
     constructor(
-        private contactRepo: ContactRepository,
+        private contactService: ContactService,
     ) {
         this.app = express();
         Promise.all([this.initializeMiddleware(), this.initializeControllers()]);
@@ -19,21 +19,22 @@ export class Api {
 
     private async initializeMiddleware(): Promise<void> {
 
-        // Request Logging
-        this.app.use(
-            expressWinston.logger({
-                transports: [new winston.transports.Console()],
-                format: winston.format.combine(
-                    winston.format.json(),
-                ),
-                meta: true, // optional: control whether you want to log the meta data about the request (default to true)
-                msg: "HTTP {{req.method}} {{req.url}}", // optional: customize the default logging message. E.g. "{{res.statusCode}} {{req.method}} {{res.responseTime}}ms {{req.url}}"
-                ignoreRoute: (req, res) => {
-                    return false;
-                }, // optional: allows to skip some log messages based on request and/or response
-                headerBlacklist: ["Authorization", "postman-token"], // Don't print authorization header
-            }),
-        );
+        // Request Logging (if required)
+        // this.app.use(
+        //     expressWinston.logger({
+        //         transports: [new winston.transports.Console()],
+        //         format: winston.format.combine(
+        //             winston.format.json(),
+        //         ),
+        //         meta: true, // optional: control whether you want to log the meta data about the request (default to true)
+        //         msg: "HTTP {{req.method}} {{req.url}}", // optional: customize the default logging message. E.g. "{{res.statusCode}} {{req.method}} {{res.responseTime}}ms {{req.url}}"
+        //         ignoreRoute: (req, res) => {
+        //             return false;
+        //         }, // optional: allows to skip some log messages based on request and/or response
+        //         headerBlacklist: ["Authorization", "postman-token"], // Don't print authorization header
+        //     }),
+        // );
+
         this.app.use(json());
 
         if (EnvConfig.stage !== "local") {
@@ -52,7 +53,7 @@ export class Api {
 
     private async initializeControllers(): Promise<void> {
         const contactController: ContactController = new ContactController(
-            this.contactRepo,
+            this.contactService,
         );
         contactController.addRoutes(this.app);
 

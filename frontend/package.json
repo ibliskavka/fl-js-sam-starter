@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "copy-interfaces": "cp ../backend/src/api-interfaces.ts src/",
-    "start": "npm run copy-interfaces && cp ./env/dev/* ./public/ && npm run update-build-time && react-scripts start",
+    "start": "npm run copy-interfaces && npm run update-build-time && react-scripts start",
     "update-build-time": "node updateBuildTime.js",
     "build": "npm run copy-interfaces && npm run update-build-time && react-scripts build",
     "build:dev": "cp ./env/dev/* ./public/ && npm run build",

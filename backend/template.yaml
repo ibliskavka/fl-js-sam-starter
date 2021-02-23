@@ -192,25 +192,6 @@ Resources:
             Path: /api/profiles
             Method: post
 
-  ConnectFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      Handler: src/lambda/index.profiles
-      Description: Implements server-side features
-      Events:
-        GetInstances:
-          Type: Api
-          Properties:
-            RestApiId: !Ref RestApi
-            Path: /api/listInstances
-            Method: post
-        GetFlows:
-          Type: Api
-          Properties:
-            RestApiId: !Ref RestApi
-            Path: /api/listFlows
-            Method: post
-
   CustomResourceFunction:
     Type: AWS::Serverless::Function
     Properties:

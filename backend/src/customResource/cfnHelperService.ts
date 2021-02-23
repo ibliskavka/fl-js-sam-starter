@@ -1,5 +1,5 @@
 import { CloudFormationCustomResourceEvent, Context } from "aws-lambda";
-import * as axios from "axios";
+import fetch from "node-fetch";
 import { getLogger } from "../services/logging";
 
 export interface CfnResponse {
@@ -61,9 +61,10 @@ export class CfnHelperService {
 
         this.logger.debug("RESPONSE BODY:\n", body);
 
-        const response = await axios.default.put(event.ResponseURL, body);
+        const response = await fetch(event.ResponseURL, {method: "put", body});
+        const data = response.text();
 
-        this.logger.debug("CloudFormation Response", { data: response.data });
+        this.logger.debug("CloudFormation Response", { data });
         return;
     }
 }

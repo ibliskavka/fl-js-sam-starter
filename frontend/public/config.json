@@ -1,12 +1,12 @@
 {
-    "environment": "staging",
+    "environment": "dev",
     "region": "us-east-1",
-    "apiUrl": "https://d30rgytop5p7vu.cloudfront.net",
+    "apiUrl": "",
     "cognito": {
-        "clientId": "ueem7cab44ivb900he27hpch9",
-        "domain": "vf-ccsync2-dev2.auth.us-east-1.amazoncognito.com",
-        "userPoolId": "us-east-1_M20HncEh2"
+        "clientId": "4faf69t9bk67bf9csn61lreu83",
+        "domain": "fl-js-dev.auth.us-east-1.amazoncognito.com",
+        "userPoolId": "us-east-1_zTTBbDVZa"
     },
-    "buildTime": 1613596962484,
+    "buildTime": 1614037626331,
     "version": "1.0.0"
 }

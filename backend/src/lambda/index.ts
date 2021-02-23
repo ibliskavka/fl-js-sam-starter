@@ -4,6 +4,7 @@ import { ContactRepository } from "../repositories/contactRepository";
 import { Api } from "./api";
 import { createServer, proxy } from "aws-serverless-express";
 import { EnvConfig } from "../services/envConfig";
+import { ContactService } from "../services/contact.service";
 
 /**
  * Lambda expects functions, not objects.
@@ -15,6 +16,7 @@ const tableName = EnvConfig.tableName;
 const contactRepo = new ContactRepository(tableName, db);
 
 export const api = (event: APIGatewayProxyEvent, context: Context): void => {
-    const api = new Api(contactRepo);
+    const contactService = new ContactService(contactRepo);
+    const api = new Api(contactService);
     proxy(createServer(api.app), event, context);
 };
