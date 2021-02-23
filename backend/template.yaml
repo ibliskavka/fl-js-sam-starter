@@ -83,7 +83,7 @@ Resources:
     Type: AWS::Cognito::UserPool
     Properties:
       UserPoolName: !Ref AWS::StackName
-      MfaConfiguration: OFF
+      MfaConfiguration: "OFF"
       AdminCreateUserConfig:
         AllowAdminCreateUserOnly: true
         InviteMessageTemplate:
@@ -103,7 +103,7 @@ Resources:
   CognitoUserGroup:
     Type: AWS::Cognito::UserPoolGroup
     Properties:
-      Description: !Sub "Allows user to manage profiles"
+      Description: "Allows user to manage profiles"
       GroupName: admin
       UserPoolId: !Ref UserPool
 
@@ -116,7 +116,7 @@ Resources:
         - Name: email
           Value: !Ref AdminUserEmail
         - Name: email_verified
-          Value: true
+          Value: "true"
       Username: !Ref AdminUserEmail
       UserPoolId: !Ref UserPool
 
@@ -312,7 +312,7 @@ Resources:
             OriginCustomHeaders:
               - HeaderName: "Verify-From-Cf"
                 HeaderValue: !Ref AcmCertArn
-        Enabled: "true"
+        Enabled: true
         Comment: !Ref AWS::StackName
         CustomErrorResponses:
           - ErrorCode: 403
@@ -332,10 +332,10 @@ Resources:
             - GET
             - HEAD
             - OPTIONS
-          Compress: "true"
+          Compress: true
           TargetOriginId: myS3Origin
           ForwardedValues:
-            QueryString: "false"
+            QueryString: false
             Cookies:
               Forward: none
           ViewerProtocolPolicy: redirect-to-https
