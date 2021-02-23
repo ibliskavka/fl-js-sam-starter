@@ -249,7 +249,7 @@ Resources:
         version: 1.0.1
         environment: !Ref Environment
         region: !Ref AWS::Region
-        apiUrl: !Sub https://${AppDistribution.DomainName}/api
+        apiUrl: !Sub https://${AppDistribution.DomainName}
         cognito:
           clientId: !Ref UserPoolClient
           domain: !Sub ${UserPoolDomain}.auth.${AWS::Region}.amazoncognito.com
