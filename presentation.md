@@ -10,7 +10,7 @@
 
 - When I was a kid I wanted to be an inventor like Edison or Tesla; but I ended up playing way too many video games.
 - Eventually, I discovered software engineering and to me creating software is invention.
-- Some other hobbies: crossfit, house remodels, and making apps.
+- Some other hobbies: kayaking, house remodels, and making apps.
 - I am a team lead at VoiceFoundry, which integrates Amazon Connect, a cloud based call center
 - I am not representing VoiceFoundry today, but I am quite proud of this company so I am shamelessly plugging it anyway
 - We are a consultancy so we see a lot of the same requirements over and over, which allows us to create app and deployment patterns.

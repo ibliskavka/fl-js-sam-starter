@@ -39,7 +39,7 @@ export class AppContextProvider extends Component<{}, IState> {
         try {
             await this.cfg.load();
             Hub.listen("auth", this.authListener);
-            const repo = new ApiClient(this.cfg);
+            const api = new ApiClient(this.cfg);
             const authenticated = await AmplifyService.isAuthenticated();
             const groups = await AmplifyService.getUserGroups();
 
@@ -50,7 +50,7 @@ export class AppContextProvider extends Component<{}, IState> {
                     authenticated: authenticated,
                     groups,
                     config: this.cfg,
-                    api: repo,
+                    api: api,
                 },
             });
 
