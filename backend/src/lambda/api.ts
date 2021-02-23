@@ -6,6 +6,7 @@ import { eventContext } from "aws-serverless-express/middleware";
 import { ContactController } from "../controllers/contact.controller";
 import { EnvConfig } from "../services/envConfig";
 import { ContactService } from "../services/contact.service";
+import cors from "cors";
 
 export class Api {
     public app: Application;
@@ -18,6 +19,15 @@ export class Api {
     }
 
     private async initializeMiddleware(): Promise<void> {
+
+        this.app.use(
+            cors({
+                origin: ["http://localhost:3000"],
+                methods: ["OPTIONS", "POST", "GET", "PATCH", "DELETE"],
+                allowedHeaders: ["Authorization", "Content-Type"],
+                optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+            }),
+        );
 
         // Request Logging (if required)
         // this.app.use(

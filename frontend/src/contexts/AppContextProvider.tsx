@@ -58,7 +58,6 @@ export class AppContextProvider extends Component<{}, IState> {
                 this.logger.debug("Processing authentication.");
             }
 
-            document.title = "CC Sync";
         } catch (error) {
             this.logger.error(`Configuration Failed: ${error.message}`, error);
         }

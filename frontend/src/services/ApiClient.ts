@@ -1,18 +1,31 @@
-import { IConnectApi, IProfileRegion, IOption } from "../api-interfaces";
+import { IContactApi, IContact } from "../api-interfaces";
 import ConfigurationService from "./ConfigurationService";
 import { getLogger, Logger } from "./LoggingService";
 import { Auth } from "aws-amplify";
 
-export class ApiClient implements IConnectApi {
+export class ApiClient implements IContactApi {
   logger: Logger;
 
   constructor(private cfg: ConfigurationService) {
     this.logger = getLogger("DataService");
   }
 
-  async listInstances(req: IProfileRegion):  Promise<IOption[]>{
-    const response = await this.get(`/api/instances?profile=${req.profile}&region=${req.region}`);
+  async listContacts():  Promise<IContact[]>{
+    const response = await this.get(`/contact`);
     return await response.json();
+  }
+
+  async getContactById(email: string): Promise<IContact> {
+    const response = await this.get(`/contact/${email}`);
+    return await response.json();
+  }
+
+  async saveContact(contact: IContact): Promise<void> {
+    await this.post(`/contact`, contact);
+  }
+
+  async deleteContact(email: string): Promise<void> {
+    await this.delete(`/contact/${email}`);
   }
 
   private async get(endpoint: string): Promise<Response> {
@@ -20,7 +33,11 @@ export class ApiClient implements IConnectApi {
   }
 
   private async post(endpoint: string, body?: any): Promise<Response> {
-    return await this.request(endpoint, "POST")
+    return await this.request(endpoint, "POST", body)
+  }
+
+  private async delete(endpoint: string): Promise<Response> {
+    return await this.request(endpoint, "DELETE")
   }
 
   private async request(endpoint: string, method: string, body?: any): Promise<Response> {
@@ -31,6 +48,7 @@ export class ApiClient implements IConnectApi {
       body: body ? JSON.stringify(body) : undefined,
       headers: {
         Authorization: auth,
+        "Content-Type": "application/json"
       },
     });
 

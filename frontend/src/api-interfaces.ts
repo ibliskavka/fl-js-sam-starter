@@ -44,27 +44,9 @@ export const validateSchema = (
     return response;
 };
 
-export interface IProfileRegion {
-    profile: string;
-    region: string;
-}
-
-export interface IInstance {
-    profile: string;
-    region: string;
-    instanceId: string;
-}
-
-export interface IOption {
-    value: string;
-    text: string;
-  }
-
-export interface IProfileApi {
-    listProfiles: () => Promise<IContact[]>;
-    saveProfile: (profile: IContact) => Promise<void>;
-}
-
-export interface IConnectApi {
-    listInstances: (req: IProfileRegion) => Promise<IOption[]>;
+export interface IContactApi {
+    listContacts: () => Promise<IContact[]>;
+    getContactById: (email: string)=> Promise<IContact>;
+    saveContact: (contact: IContact) => Promise<void>;
+    deleteContact: (email: string) => Promise<void>;
 }

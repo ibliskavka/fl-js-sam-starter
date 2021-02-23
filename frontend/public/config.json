@@ -1,12 +1,12 @@
 {
     "environment": "dev",
     "region": "us-east-1",
-    "apiUrl": "",
+    "apiUrl": "http://localhost:5000",
     "cognito": {
         "clientId": "4faf69t9bk67bf9csn61lreu83",
         "domain": "fl-js-dev.auth.us-east-1.amazoncognito.com",
         "userPoolId": "us-east-1_zTTBbDVZa"
     },
-    "buildTime": 1614037626331,
+    "buildTime": 1614042134362,
     "version": "1.0.0"
 }
