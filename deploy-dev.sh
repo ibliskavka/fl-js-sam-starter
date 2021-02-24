@@ -3,10 +3,10 @@ set -e                        # Fail script on error
 
 PROFILE="default"
 REGION="us-east-1"                          # Deployment Region
-BUCKET="lsw-serverless-$REGION"             # Build Artifact Bucket - must be created beforehand
+BUCKET="your-bucket-name"             # Build Artifact Bucket - must be created beforehand
 
 ENVIRONMENT="dev"
-ADMIN_USER_EMAIL="lsw-apps@outlook.com"
+ADMIN_USER_EMAIL="youremail@test.com"
 
 STACK_NAME="fl-js-${ENVIRONMENT}"
 

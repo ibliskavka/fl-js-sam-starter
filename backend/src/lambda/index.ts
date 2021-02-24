@@ -15,8 +15,10 @@ const db = new DocumentClient();
 const tableName = EnvConfig.tableName;
 const contactRepo = new ContactRepository(tableName, db);
 
+const contactService = new ContactService(contactRepo);
+const apiObj = new Api(contactService);
+const server = createServer(apiObj.app);
+
 export const api = (event: APIGatewayProxyEvent, context: Context): void => {
-    const contactService = new ContactService(contactRepo);
-    const api = new Api(contactService);
-    proxy(createServer(api.app), event, context);
+    proxy(server, event, context);
 };
