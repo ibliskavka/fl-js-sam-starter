@@ -10,11 +10,11 @@ Please review the presentation and notes for an overview of this project.
 
 ### Prerequisites
 
-1. AWS Account
-2. AWS CLI
-3. SAM CLI
-4. Node JS
-5. Visual Studio Code
+1. [AWS Account](https://aws.amazon.com/premiumsupport/knowledge-center/create-and-activate-aws-account/)
+2. [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html)
+3. [SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html)
+4. [Node JS](https://nodejs.org/en/download/)
+5. [Visual Studio Code](https://code.visualstudio.com/)
     - You can use other IDEs, but this repo assumes VS Code
 6. Mac, Linux or Windows Subsystem for Linux
     - You can run this on Windows, but the deploy scripts use bash
