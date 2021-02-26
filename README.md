@@ -1,10 +1,11 @@
-# FloridaJS Serverless Starter
+# FloridaJS AWS Serverless Demo
 
-Please review the presentation and notes for an overview of this project.
+This project demonstrates how to create installable serverless web applications in AWS
 
-[Presentation](https://prezi.com/view/xTv8rPh2vNpNNmyt7thX/)
-
-[Presentation Notes](presentation.md)
+- [Presentation Video](https://youtu.be/pqcSUxIXYb4)
+- [Presentation Slides](https://prezi.com/view/xTv8rPh2vNpNNmyt7thX/)
+- [Presentation Notes](presentation.md)
+- [FloridaJS Meetup Event](https://www.meetup.com/floridajs/events/275711268)
 
 ## Developer Environment Setup
 
