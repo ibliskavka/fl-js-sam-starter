@@ -10,10 +10,6 @@
 # supported CodeQL languages.
 #
 name: "CodeQL"
-
-paths:
-  - backend/src
-  - frontend/src
   
 on:
   push:
