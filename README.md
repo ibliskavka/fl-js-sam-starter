@@ -1,5 +1,11 @@
 # FloridaJS AWS Serverless Demo
 
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=ibliskavka_fl-js-sam-starter&metric=bugs)](https://sonarcloud.io/dashboard?id=ibliskavka_fl-js-sam-starter)
+
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=ibliskavka_fl-js-sam-starter&metric=code_smells)](https://sonarcloud.io/dashboard?id=ibliskavka_fl-js-sam-starter)
+
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=ibliskavka_fl-js-sam-starter&metric=security_rating)](https://sonarcloud.io/dashboard?id=ibliskavka_fl-js-sam-starter)
+
 This project demonstrates how to create installable serverless web applications in AWS
 
 - [Presentation Video](https://youtu.be/pqcSUxIXYb4)
